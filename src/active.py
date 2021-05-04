@@ -53,7 +53,7 @@ def f(x):
     y2 = 0.8
 
 
-    b = (y1/y2)**(x1-x2)
+    b = (y1/y2)**(1/(x1-x2))
     a = y2/b**x2
     ans = a*b**x
     return ans
