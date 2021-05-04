@@ -12,7 +12,6 @@ def movebase_client():
     goal.target_pose.header.stamp = rospy.Time.now()
     goal.target_pose.pose.position.x = 0.5
     goal.target_pose.pose.orientation.w = 1.0
-cacacacsc
     client.send_goal(goal)
     wait = client.wait_for_result()
     if not wait:
@@ -29,4 +28,3 @@ if __name__ == '__main__':
             rospy.loginfo("Goal execution done!")
     except rospy.ROSInterruptException:
         rospy.loginfo("Navigation test finished.")
-

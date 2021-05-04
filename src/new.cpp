@@ -12,41 +12,40 @@
 #include <tf/transform_listener.h>
 
 
-class TFClass
+class pathPublisher
 {
 public:
-  TFClass()
-  {
-    pointsub_ = point_nh_.subscribe("/person_position", 1, &TFClass::callback, this);
+  pathPublisher(){
+    pointsub_ = point_nh_.subscribe("/person_position", 1, &pathPublisher::callback, this);
     optimized_point_pub_ = point_nh_.advertise<geometry_msgs::Point>("Optimized_person_distance",10000,true);
   }
 void callback(const ros_detection::FloatVector::ConstPtr& pointData)
+{
+  current_size_ = pointData->point.size();
+  temp_point_.x = 0;
+  temp_point_.y = 0;
+  temp_point_.z = 0;
+  int count = 0;
+  /* Creating the person_detection_frame */
+  quat_.setRPY(4.71238898,0,-1.57079633);
+  quat_.normalize();
+  transform_.setOrigin(tf::Vector3(0,0,0));
+  transform_.setRotation(quat_);
+  br_.sendTransform(tf::StampedTransform(transform_, ros::Time::now(), "zed_left_camera_frame", "person_detection_frame"));
+  if (current_size_ >=10)
   {
-    /* Creating the person_detection_frame */
-    quat_.setRPY(4.71238898, 0, 4.71238898);
-    quat_.normalize();
-    transform_.setOrigin(tf::Vector3(0,0,0));
-    transform_.setRotation(quat_);
-    br_.sendTransform(tf::StampedTransform(transform_, ros::Time::now(), "zed_left_camera_frame", "person_detection_frame"));
-    int count = 0;
-    current_size_ = pointData->point.size();
-    temp_point_.x = 0;
-    temp_point_.y = 0;
-    temp_point_.z = 0;
-    if (current_size_ >=10)
+    for (int i = current_size_-10; i < current_size_; i++)
     {
-      for (int i = current_size_-10; i < current_size_; i++)
-      {
-        temp_point_.x = temp_point_.x + pointData->point[i].x;
-        temp_point_.y = temp_point_.y + pointData->point[i].y;
-        temp_point_.z = temp_point_.z + pointData->point[i].z;
-        count++;
-      }
-      testpoint_.x = temp_point_.x/count;
-      testpoint_.y = temp_point_.y/count;
-      testpoint_.z = temp_point_.z/count;
-      optimized_point_pub_.publish(testpoint_);
+      temp_point_.x = temp_point_.x + pointData->point[i].x;
+      temp_point_.y = temp_point_.y + pointData->point[i].y;
+      temp_point_.z = temp_point_.z + pointData->point[i].z;
+      count++;
     }
+    testpoint_.x = temp_point_.x/count;
+    testpoint_.y = temp_point_.y/count;
+    testpoint_.z = temp_point_.z/count;
+    optimized_point_pub_.publish(testpoint_);
+  }
 }
 
 private:
@@ -65,7 +64,8 @@ private:
 int main(int argc, char **argv){
   ros::init(argc, argv, "personTF");
 
-  TFClass obj;
+
+  pathPublisher pathobj;
   ros::spin();
   return 0;
 }

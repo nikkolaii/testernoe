@@ -5,6 +5,7 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Point.h>
 #include <std_msgs/Header.h>
+#include <nav_msgs/Path.h>
 #include "ros_detection/FloatVector.h"
 #include <tf/transform_listener.h>
 #include <cmath>
@@ -14,35 +15,54 @@ void movebaseaction(ros::NodeHandle& nh, tf::TransformListener& listener, move_b
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>& myclient)
 {
   tf::StampedTransform stamp;
-  geometry_msgs::Point point = *(ros::topic::waitForMessage<geometry_msgs::Point>("move_base_goal_topic", nh));
+  nav_msgs::Path path = *(ros::topic::waitForMessage<nav_msgs::Path>("person_path", nh));
   std_msgs::Float64 FOV_angle = *(ros::topic::waitForMessage<std_msgs::Float64>("/FOV_angle", nh));
+  geometry_msgs::Point opt_point = *(ros::topic::waitForMessage<geometry_msgs::Point>("/Optimized_person_distance", nh));
+  std_msgs::Float64 dist = *(ros::topic::waitForMessage<std_msgs::Float64>("/relative_distance", nh));
 
   listener.waitForTransform("map","base_link",ros::Time::now(),ros::Duration(3.0));
   listener.lookupTransform("map","base_link",ros::Time(0), stamp);
-
+  int seq = path.header.seq;
+  ROS_INFO_STREAM("SEQ = "<< seq);
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
-  goal.target_pose.pose.position.x = point.x;
-  goal.target_pose.pose.position.y = point.y;
+  goal.target_pose.pose.position.x = path.poses[seq].pose.position.x;
+  goal.target_pose.pose.position.y = path.poses[seq].pose.position.y;
   goal.target_pose.pose.position.z = 0;
   goal.target_pose.pose.orientation.x = stamp.getRotation().x();
   goal.target_pose.pose.orientation.y = stamp.getRotation().y();
   goal.target_pose.pose.orientation.z = stamp.getRotation().z();
   goal.target_pose.pose.orientation.w = stamp.getRotation().w();
 
-  ROS_INFO_STREAM("Sending the following navigation goal: " << goal);
+  // ROS_INFO_STREAM("Sending the following navigation goal: " << goal);
   myclient.sendGoal(goal);
-  ROS_INFO_STREAM("Angle = "<<FOV_angle);
-  ros::Duration(4).sleep();
-    while (myclient.getState() == actionlib::SimpleClientGoalState::ACTIVE && FOV_angle.data > -15 && FOV_angle.data < 15 )
+  myclient.sendGoal(goal);
+
+  // ROS_INFO_STREAM("Angle = "<<FOV_angle);
+  dist = *(ros::topic::waitForMessage<std_msgs::Float64>("/relative_distance", nh));
+  // ROS_INFO_STREAM("\n DISTNACE: = " << dist);
+  if (dist.data > 1)
+  {
+    ros::Duration(2).sleep();
+    ROS_INFO_STREAM("Current distance is: " << dist << "Generating new goal for the next 4 seconds to catch up with the person");
+  }
+  else
+  {
+  ros::Duration(2).sleep();
+  }
+
+    while (myclient.getState() == actionlib::SimpleClientGoalState::ACTIVE && FOV_angle.data > -15 && FOV_angle.data < 15 && dist.data <= 1)
     {
       ROS_INFO_STREAM(myclient.getState().toString().c_str());
       FOV_angle = *(ros::topic::waitForMessage<std_msgs::Float64>("/FOV_angle", nh));
       ROS_INFO_STREAM("CURRENT ANGLE IS :" << FOV_angle);
+      dist = *(ros::topic::waitForMessage<std_msgs::Float64>("/relative_distance", nh));
+      // ROS_INFO_STREAM("\n x : " << opt_point.x << "\n y : " << opt_point.y <<"\n z : " << opt_point.z);
+      ROS_INFO_STREAM("\n DISTNACE: = " << dist);
     }
     if (myclient.getState() == actionlib::SimpleClientGoalState::ACTIVE) {
       ROS_INFO_STREAM("Cancelling the current goal");
-      myclient.cancelGoal();
+      // myclient.cancelGoal();
     }
 
   // result = myclient.waitForResult();/opt/ros/kinetic/include/ros/console.h:379:7: note: in expansion of macro ‘ROSCONSOLE_PRINT_AT
