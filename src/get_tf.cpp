@@ -13,6 +13,8 @@ public:
 PersonBroadcaster(){
   dist_sub_ = nh_.subscribe("/Optimized_person_distance",1, &PersonBroadcaster::callback, this);
   path_pub_ = nh_.advertise<nav_msgs::Path>("person_path",1, true);
+  posestamped_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("pathforbag",1, true);
+
   move_base_pub_ = nh_.advertise<geometry_msgs::Point>("move_base_goal_topic",1,true);
   anglePub_ = nh_.advertise<std_msgs::Float64>("FOV_angle", 1, true);
   distancePub_ = nh_.advertise<std_msgs::Float64>("distance", 1, true);
@@ -43,9 +45,11 @@ void callback(const geometry_msgs::Point::ConstPtr& pointData)
   posestamped_.pose.orientation = mappose_.pose.orientation;
   path_.poses.push_back(posestamped_);
   path_pub_.publish(path_);
+  posestamped_pub_.publish(posestamped_);
   move_base_pub_.publish(posestamped_.pose.position);
   FOV_angle.data  = -std::atan2(pointData->z, pointData->x) * 180 / 3.141592 +90;
   anglePub_.publish(FOV_angle);
+  ROS_INFO_STREAM(FOV_angle);
   seq++;
 
 }
@@ -57,6 +61,7 @@ private:
   ros::Publisher move_base_pub_;
   ros::Publisher anglePub_;
   ros::Publisher distancePub_;
+  ros::Publisher posestamped_pub_;
   tf::TransformBroadcaster br_;
   tf::Transform transform_;
   tf::TransformListener listener_;
