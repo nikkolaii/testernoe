@@ -43,12 +43,12 @@ void movebaseaction(ros::NodeHandle& nh, tf::TransformListener& listener, move_b
   // ROS_INFO_STREAM("\n DISTNACE: = " << dist);
   if (dist.data > 1)
   {
-    ros::Duration(2).sleep();
+    ros::Duration(1).sleep();
     ROS_INFO_STREAM("Current distance is: " << dist << "Generating new goal for the next 4 seconds to catch up with the person");
   }
   else
   {
-  ros::Duration(2).sleep();
+  ros::Duration(1).sleep();
   }
 
     while (myclient.getState() == actionlib::SimpleClientGoalState::ACTIVE && FOV_angle.data > -15 && FOV_angle.data < 15 && dist.data <= 1)
