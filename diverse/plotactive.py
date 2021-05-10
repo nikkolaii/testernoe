@@ -11,10 +11,12 @@ def f(x):
         x1 = 0.5
         x2 = 2
 
-        y1 = 0.2ss
+        y1 = 0.2
         y2 = 0.8
         b = (y1/y2)**(1/(x1-x2))
         a = y2/b**x2
+	print("a = ", a)
+	print("\nb = ", b)
         return(a*b**x)
 
 x = np.linspace(0,3,1000)

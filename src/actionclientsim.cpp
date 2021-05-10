@@ -36,7 +36,7 @@ void movebaseaction(ros::NodeHandle& nh, tf::TransformListener& listener, move_b
 
   // ROS_INFO_STREAM("Sending the following navigation goal: " << goal);
   myclient.sendGoal(goal);
-  myclient.sendGoal(goal);
+
 
   // ROS_INFO_STREAM("Angle = "<<FOV_angle);
   dist = *(ros::topic::waitForMessage<std_msgs::Float64>("/relative_distance", nh));
@@ -65,27 +65,7 @@ void movebaseaction(ros::NodeHandle& nh, tf::TransformListener& listener, move_b
       // myclient.cancelGoal();
     }
 
-  // result = myclient.waitForResult();/opt/ros/kinetic/include/ros/console.h:379:7: note: in expansion of macro ‘ROSCONSOLE_PRINT_AT
-//   else{
-//     if (myclient.getState() == actionlib::SimpleClientGoalState::LOST){
-//       // ROS_INFO_STREAM("The current goal is: "<<goal);
-//
-// }
-// else{
-//   // ROS_INFO_STREAM("The current goal is: "<<goal);
-//   // ROS_INFO_STREAM("IM FUCKING CANCELLING IT NOW, BE RIGHT");
-//
-//   myclient.cancelGoal();
-// }
-//   ROS_INFO_STREAM("The person detected is out of the field of view. Goal aborted"<<2);
-//       }
-
-      // stateofgoal = myclient.getState();
-
 }
-
-
-
 
 int main(int argc, char** argv)
 {

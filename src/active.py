@@ -13,9 +13,9 @@ def f(x):
     b = (y1/y2)**(1/(x1-x2))
     a = y2/b**x2
     return(a*b**x)
+
 def callback(data):
     distance = data.data
-
     if distance >= 0.5 and distance <= 2:
         cost = f(distance)
     if distance < 0.5:

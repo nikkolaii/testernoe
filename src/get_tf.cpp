@@ -21,14 +21,12 @@ PersonBroadcaster(){
 }
 void callback(const geometry_msgs::Point::ConstPtr& pointData)
 {
-
   personpose_.pose.position.x = pointData->x;
   personpose_.pose.position.y = 0;
   personpose_.pose.position.z = pointData->z;
   personpose_.pose.orientation.w = 1;
   personpose_.header.stamp = ros::Time(0);
   personpose_.header.frame_id = "person_detection_frame";
-
 
   listener_.waitForTransform("map","person_detection_frame",ros::Time::now(),ros::Duration(3.0));
   listener_.transformPose("map", personpose_, mappose_);
