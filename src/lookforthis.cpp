@@ -13,11 +13,11 @@
 void movebaseaction(ros::NodeHandle& nh, tf::TransformListener& listener, move_base_msgs::MoveBaseGoal& goal,
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>& myclient)
 {
-
+  ROS_INFO("HI");
   geometry_msgs::Point point = *(ros::topic::waitForMessage<geometry_msgs::Point>("move_base_goal_topic", nh));
   std_msgs::Float64 FOV_angle = *(ros::topic::waitForMessage<std_msgs::Float64>("/FOV_angle", nh));
   std_msgs::Float64 distance = *(ros::topic::waitForMessage<std_msgs::Float64>("/distance", nh));
-
+  ROS_INFO_STREAM(point << FOV_angle << distance);
   tf::StampedTransform stamp;
   listener.waitForTransform("map","base_link",ros::Time::now(),ros::Duration(3.0));
   listener.lookupTransform("map","base_link",ros::Time(0), stamp);
@@ -35,7 +35,7 @@ void movebaseaction(ros::NodeHandle& nh, tf::TransformListener& listener, move_b
   ROS_INFO_STREAM("Sending the following navigation goal: " << goal);
   myclient.sendGoal(goal);
   ROS_INFO_STREAM("Angle = "<<FOV_angle);
-  ros::Duration(1).sleep();
+  ros::Duration(4).sleep();
     while (myclient.getState() == actionlib::SimpleClientGoalState::ACTIVE && std::abs(FOV_angle.data) <= 15 && distance.data < 1)
     {
       ROS_INFO_STREAM(myclient.getState().toString().c_str());
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> myclient("move_base", true);
   ROS_INFO("Waiting for the move_base action server");
-  myclient.waitForServer();
+  myclient.waitForServer(ros::Duration(3));
   ROS_INFO("Connected to move base server");
   ROS_INFO("");
 

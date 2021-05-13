@@ -62,7 +62,7 @@ private:
 };
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "personTF");
+  ros::init(argc, argv, "detection_frame_node");
   TFClass pathobj;
   ros::spin();
   return 0;

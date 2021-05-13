@@ -57,7 +57,7 @@ class PersonBroadcaster
 public:
 PersonBroadcaster(){
   path_sub_ = nh_.subscribe("/person_path",1, &PersonBroadcaster::callback, this);
-  dist_pub_ = nh_.advertise<std_msgs::Float64>("FOV_angle",10000,true);
+  dist_pub_ = nh_.advertise<std_msgs::Float64>("FOV_angle2",10000,true);
 }
 void callback(const nav_msgs::Path::ConstPtr& pathData)
 {

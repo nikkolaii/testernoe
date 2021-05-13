@@ -1,0 +1,41 @@
+<launch>
+   <!-- Run ROSARIA (Sensors and odometry)-->
+   <node pkg="rosaria" type="RosAria" name="RosAria" output="screen">
+   <param name="publish_aria_lasers" value="true"/>
+   <remap from="RosAria/pose" to="odom" />
+   <remap from="RosAria/cmd_vel" to="cmd_vel" />
+   <param name="port" value="/dev/ttyUSB0" type="string"/>
+   </node>
+
+   <!-- Set up transform configuration (URDF, joint_state_publisher and robot_state_publisher -->
+   <param name="robot_description" textfile="$(find robot_state_publisher)/amr-ros-config/cyborg_description/urdf/cybrog_rtabmap.urdf"/>
+   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />   
+   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+   <node name="robot_pose_publisher" pkg="robot_pose_publisher" type="robot_pose_publisher" />
+
+
+
+   <master auto="start"/>
+   <!-- Run the map server -->
+   <arg name="map_file" default="$(find map_server)/maps/cyborg_office.yaml"/>
+   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/> 
+
+   <!--- Run AMCL -->
+   <include file="$(find amcl)/examples/amcl_diff.launch" /> 
+
+<!--       MOVE_BASE           -->
+   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+   
+   <rosparam file="$(find cyborg_2dnav)/costmap_common_params.yaml" command="load" ns="global_costmap" /> 
+   <rosparam file="$(find cyborg_2dnav)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+   <rosparam file="$(find cyborg_2dnav)/local_costmap_params.yaml" command="load" />
+   <rosparam file="$(find cyborg_2dnav)/global_costmap_params.yaml" command="load" /> 
+   <rosparam file="$(find cyborg_2dnav)/base_local_planner_params.yaml" command="load" />
+   </node>
+
+
+   <node pkg="rviz" type="rviz" name="rviz" />
+   <node name="ros_detection_node_1" pkg="ros_detection" type="ros_detection_node" />
+   <node name="ros_detection_node_2" pkg="ros_detection" type="ros_detection_tf" />
+
+</launch>

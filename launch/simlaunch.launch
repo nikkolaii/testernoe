@@ -1,0 +1,7 @@
+<launch>
+   <node name="ros_detection_node_2" pkg="ros_detection" type="ros_detection_distance" />
+   <node name="ros_detection_node_3" pkg="ros_detection" type="ros_detection_relativeangle" />
+   <node name="ros_detection_node_5" pkg="ros_detection" type="active.py" />
+
+
+</launch>

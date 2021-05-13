@@ -27,7 +27,8 @@ void callback(const geometry_msgs::Point::ConstPtr& pointData)
   personpose_.pose.orientation.w = 1;
   personpose_.header.stamp = ros::Time(0);
   personpose_.header.frame_id = "person_detection_frame";
-
+  distance.data = std::sqrt(std::pow(pointData->x,2) + std::pow(pointData->z,2));
+  distancePub_.publish(distance);
   listener_.waitForTransform("map","person_detection_frame",ros::Time::now(),ros::Duration(3.0));
   listener_.transformPose("map", personpose_, mappose_);
   transform_.setRotation(tf::Quaternion(mappose_.pose.orientation.x,mappose_.pose.orientation.y,mappose_.pose.orientation.z,mappose_.pose.orientation.w));
@@ -68,13 +69,14 @@ private:
   geometry_msgs::PoseStamped mappose_;
   geometry_msgs::PoseStamped posestamped_;
   std_msgs::Float64 FOV_angle;
+  std_msgs::Float64 distance;
   nav_msgs::Path path_;
   int seq = 0;
 };
 
 int main(int argc, char **argv)
 {
-  ros::init(argc,argv,"node");
+  ros::init(argc,argv,"personTF");
   PersonBroadcaster tfobj;
   ros::spin();
   return 0;
